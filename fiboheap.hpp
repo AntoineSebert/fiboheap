@@ -38,7 +38,7 @@ extern "C" {
 }
 
 template<class T>
-class FibHeap {
+class fibonacci_heap {
 	/* attributes */
 		private:
 			size_t n;
@@ -46,21 +46,21 @@ class FibHeap {
 	/* members */
 		public:
 			// constructors
-				FibHeap() : n(0), min(nullptr) {
+				fibonacci_heap() : n(0), min(nullptr) {
 					int a = -1;
 					push(0, &a);
 					extract_min();
 				}
-				FibHeap(const FibHeap& other) : n(other.n), min(other.min) {}
-				FibHeap(FibHeap&& other) noexcept : n(other.n), min(other.min) { delete_Nodes(other.min); }
+				fibonacci_heap(const fibonacci_heap& other) : n(other.n), min(other.min) {}
+				fibonacci_heap(fibonacci_heap&& other) noexcept : n(other.n), min(other.min) { delete_Nodes(other.min); }
 			// destructor
-				~FibHeap() noexcept { delete_Nodes(min); }
+				~fibonacci_heap() noexcept { delete_Nodes(min); }
 			// operators
-				FibHeap& operator=(const FibHeap& other) {
+				fibonacci_heap& operator=(const fibonacci_heap& other) {
 					n = other.n;
 					min = other.min;
 				}
-				FibHeap& operator=(FibHeap&& other) noexcept {
+				fibonacci_heap& operator=(fibonacci_heap&& other) noexcept {
 					n = other.n;
 					min = other.min;
 					delete_Nodes(other.min);
@@ -130,8 +130,8 @@ class FibHeap {
 					++n;
 					return x;
 				}
-				static FibHeap* union_fibheap(FibHeap* H1, FibHeap* H2) {
-					FibHeap* H = new FibHeap();
+				static fibonacci_heap* union_fibheap(fibonacci_heap* H1, fibonacci_heap* H2) {
+					fibonacci_heap* H = new fibonacci_heap();
 					H->min = H1->min;
 					if(H->min != nullptr && H2->min != nullptr) {
 						H2->min->left->right = H->min->right;
