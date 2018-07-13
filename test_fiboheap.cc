@@ -15,10 +15,11 @@
  * License along with this library.
  */
 
-#include "fiboheap.h"
-#include "fiboqueue.h"
+#include "fiboheap.hpp"
+#include "fiboqueue.hpp"
+
 #include <stdlib.h>
-#include <assert.h>
+#include <cassert>
 #include <queue>
 
 using namespace std;
@@ -27,7 +28,30 @@ struct lowerI {
 	bool operator()(const int& d1, const int& d2) { return d2 < d1; }
 };
 
-void fill_heaps(FibHeap<int>& fh, priority_queue<int, vector<int>, lowerI>& pqueue, const int& n) {
+void fill_heaps(fibonacci_heap::fibonacci_heap<int>& fh, priority_queue<int, vector<int>, lowerI>& pqueue, const unsigned int& n) {
+	for(unsigned int i = 0; i < n; ++i) {
+		auto r = rand();
+		fh.push(r);
+		pqueue.push(r);
+		// pqueue.push((fh.push(rand()))->key));
+	}
+	assert(fh.size() == n);
+	assert(pqueue.size() == n);
+}
+
+bool match_heaps(fibonacci_heap::fibonacci_heap<int>& fh, priority_queue<int, vector<int>, lowerI>& pqueue) {
+	while(!pqueue.empty()) {
+		int i1 = pqueue.top(), i2 = fh.top();
+		cerr << "i1: " << i1 << " -- i2: " << i2 << endl;
+		assert(i1 == i2);
+		pqueue.pop();
+		fh.pop();
+	}
+	assert(fh.empty());
+	return true;
+}
+
+void fill_queues(fibonacci_heap::fibonacci_queue::fibonacci_queue<int>& fh, priority_queue<int, vector<int>,lowerI>& pqueue, const unsigned int& n) {
 	for(unsigned int i = 0; i < n; ++i) {
 		int r = rand();
 		fh.push(r);
@@ -38,7 +62,7 @@ void fill_heaps(FibHeap<int>& fh, priority_queue<int, vector<int>, lowerI>& pque
 	assert(pqueue.size() == n);
 }
 
-bool match_heaps(FibHeap<int>& fh, priority_queue<int, vector<int>, lowerI>& pqueue) {
+bool match_queues(fibonacci_heap::fibonacci_queue::fibonacci_queue<int>& fh, priority_queue<int, vector<int>, lowerI>& pqueue) { // greater<int> ?
 	while(!pqueue.empty()) {
 		int i1 = pqueue.top(), i2 = fh.top();
 		//cerr << "i1: " << i1 << " -- i2: " << i2 << endl;
@@ -47,32 +71,11 @@ bool match_heaps(FibHeap<int>& fh, priority_queue<int, vector<int>, lowerI>& pqu
 		fh.pop();
 	}
 	assert(fh.empty());
-}
-
-void fill_queues(FibQueue<int>& fh, priority_queue<int, vector<int>,lowerI>& pqueue, const int& n) {
-	for(unsigned int i = 0; i < n; ++i) {
-		int r = rand();
-		fh.push(r);
-		pqueue.push(r);
-		// pqueue.push((fh.push(rand()))->key));
-	}
-	assert(fh.size() == n);
-	assert(pqueue.size() == n);
-}
-
-bool match_queues(FibQueue<int>& fh, priority_queue<int, vector<int>, lowerI>& pqueue) { // greater<int> ?
-	while(!pqueue.empty()) {
-		int i1 = pqueue.top(), i2 = fh.top();
-		//cerr << "i1: " << i1 << " -- i2: " << i2 << endl;
-		assert(i1 == i2);
-		pqueue.pop();
-		fh.pop();
-	}
-	assert(fh.empty());
+	return true;
 }
 
 int main(int argc, char *argv[]) {
-	FibHeap<int> fh;
+	fibonacci_heap::fibonacci_heap<int> fh;
 	unsigned int n = 10;
 	std::priority_queue<int, vector<int>, lowerI> pqueue;
 
@@ -91,14 +94,14 @@ int main(int argc, char *argv[]) {
 	fh.decrease_key(fh.topNode(), r);
 	assert(match_heaps(fh, pqueue));
 
-	FibQueue<int> fq;
+	fibonacci_heap::fibonacci_queue::fibonacci_queue<int> fq;
 	fill_queues(fq, pqueue, n);
 	match_queues(fq, pqueue);
 
 	fill_queues(fq, pqueue, n);
 	r = rand();
 	fq.push(r);
-	FibHeap<int>::FibNode* x = fq.findNode(r);
+	fibonacci_heap::c_node* x = fq.findNode(r);
 	assert(x != NULL);
 	int nr = r - rand() / 2;
 	fq.decrease_key(x, nr);
