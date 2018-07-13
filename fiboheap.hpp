@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Fibonacci Heap
  * Copyright (c) 2014, Emmanuel Benazera beniz@droidnik.fr, All rights reserved.
  *
@@ -9,17 +9,20 @@
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
 
+/*
+ * @note sizeof(Node) = 136, sizeof(c_node) = 64
+ */
+
 #ifndef FIBOHEAP_HPP
 #define FIBOHEAP_HPP
 
-#include <array>
 #include <algorithm>
 #include <cstddef>
 #include <cmath>
@@ -33,34 +36,35 @@ extern "C" {
 		void* key = nullptr, *payload = nullptr;
 		bool mark = false;
 		c_node* p = nullptr, *left = nullptr, *right = nullptr, *child = nullptr;
-		int degree = -1; // see if it is possible to replace by unsigned int (and climits)
+		int degree = -1;
 	} c_node;
 }
 
 template<class T>
-class FibHeap {
+class fibonacci_heap {
 	/* attributes */
 		private:
 			size_t n;
-			c_node* min; // sizeof(Node) = 136, sizeof(c_node) = 64
+			c_node* min;
 	/* members */
 		public:
 			// constructors
-				FibHeap() : n(0), min(nullptr) {
+				fibonacci_heap() : n(0), min(nullptr) {
 					int a = -1;
 					push(0, &a);
 					extract_min();
+
 				}
-				FibHeap(const FibHeap& other) : n(other.n), min(other.min) {}
-				FibHeap(FibHeap&& other) noexcept : n(other.n), min(other.min) { delete_Nodes(other.min); }
+				fibonacci_heap(const fibonacci_heap& other) : n(other.n), min(other.min) {}
+				fibonacci_heap(fibonacci_heap&& other) noexcept : n(other.n), min(other.min) { delete_Nodes(other.min); }
 			// destructor
-				~FibHeap() noexcept { delete_Nodes(min); }
+				~fibonacci_heap() noexcept { delete_nodes(min); }
 			// operators
-				FibHeap& operator=(const FibHeap& other) {
+				fibonacci_heap& operator=(const fibonacci_heap& other) {
 					n = other.n;
 					min = other.min;
 				}
-				FibHeap& operator=(FibHeap&& other) noexcept {
+				fibonacci_heap& operator=(fibonacci_heap&& other) noexcept {
 					n = other.n;
 					min = other.min;
 					delete_Nodes(other.min);
@@ -71,7 +75,7 @@ class FibHeap {
 			// accessors
 				c_node* topNode() const { return minimum(); }
 				T top() const { return minimum()->key; }
-				c_node* minimum() const { return min; }
+				[[time_complexity::Θ(1)]] c_node* minimum() const { return min; }
 				c_node* extract_min() {
 					c_node* z = min;
 
@@ -107,13 +111,13 @@ class FibHeap {
 					return z;
 				}
 			// modifiers
-				void pop() {
+				[[noreturn]] void pop() {
 					if(empty())
 						return;
 					if(c_node* x = extract_min();  x)
 						delete x;
 				}
-				c_node* insert(c_node* x) {
+				[[time_complexity::Θ(1)]] c_node* insert(c_node* x) {
 					x->degree = 0;
 					x->child = x->p = nullptr;
 					x->mark = false;
@@ -130,8 +134,8 @@ class FibHeap {
 					++n;
 					return x;
 				}
-				static FibHeap* union_fibheap(FibHeap* H1, FibHeap* H2) {
-					FibHeap* H = new FibHeap();
+				[[time_complexity::Θ(1)]] static fibonacci_heap* union_fibheap(fibonacci_heap* H1, fibonacci_heap* H2) {
+					fibonacci_heap* H = new fibonacci_heap();
 					H->min = H1->min;
 					if(H->min != nullptr && H2->min != nullptr) {
 						H2->min->left->right = H->min->right;
@@ -144,7 +148,7 @@ class FibHeap {
 					H->n = H1->n + H2->n;
 					return H;
 				}
-				void cut(c_node* x, c_node* y) {
+				[[noreturn]] void cut(c_node* x, c_node* y) {
 					if(x->right == x)
 						y->child = nullptr;
 					else {
@@ -161,7 +165,7 @@ class FibHeap {
 					x->p = nullptr;
 					x->mark = false;
 				}
-				void cascading_cut(c_node* y) {
+				[[noreturn]] void cascading_cut(c_node* y) {
 					if(c_node* z = y->p; z != nullptr) {
 						if(!y->mark)
 							y->mark = true;
@@ -171,11 +175,11 @@ class FibHeap {
 						}
 					}
 				}
-				void remove_c_node(c_node* x) {
+				[[noreturn]] void remove_c_node(c_node* x) {
 					decrease_key(x, std::numeric_limits<T>::min());
 					delete extract_min();
 				}
-				void fib_heap_link(c_node* y, c_node* x) {
+				[[noreturn]] void fib_heap_link(c_node* y, c_node* x) {
 					y->left->right = y->right;
 					y->right->left = y->left;
 					if(x->child != nullptr) {
@@ -192,7 +196,7 @@ class FibHeap {
 				}
 				c_node* push(const T& k, void* pl = nullptr) { return insert(new c_node(k, pl)); }
 				c_node* push(T&& k, void* pl = nullptr) { return insert(new c_node{ (void*)k, pl }); }
-				void decrease_key(c_node* x, int k) {
+				[[using time_complexity: Θ(1), amortized]] [[noreturn]] void decrease_key(c_node* x, int k) {
 					try {
 						if(x->key < k)
 							throw std::out_of_range("new key is greater than current key");
@@ -210,7 +214,7 @@ class FibHeap {
 						min = x;
 				}
 		protected:
-			void delete_Nodes(c_node* x) {
+			[[using time_complexity: O(log n), amortized]] [[noreturn]] void delete_nodes(c_node* x) {
 				if(!x)
 					return;
 				c_node* cur = x;
@@ -221,18 +225,18 @@ class FibHeap {
 						c_node* tmp = cur;
 						cur = cur->left;
 						if(tmp->child)
-							delete_Nodes(tmp->child);
+							delete_nodes(tmp->child);
 						delete tmp;
 					}
 					else {
 						if(cur->child)
-							delete_Nodes(cur->child);
+							delete_nodes(cur->child);
 						delete cur;
 						break;
 					}
 				}
 			}
-			void consolidate() {
+			[[noreturn]] void consolidate() {
 				if(0 < n)
 					return;
 
@@ -258,7 +262,6 @@ class FibHeap {
 				for(const auto& element : rootList) {
 					x = w = element;
 					auto d = x->degree;
-					std::cout << typeid(d).name() << endl;
 					while(A.at(d) != nullptr) {
 						y = A.at(d);
 						if(y->key < x->key)
