@@ -49,6 +49,7 @@ namespace fibonacci_heap {
 			c_node* c_node_p = (c_node*)malloc(sizeof(c_node));
 			// copie des données
 			memcpy(c_node_p, &b, sizeof *c_node_p);
+			// 
 			return c_node_p;
 		}
 	}
@@ -64,14 +65,9 @@ namespace fibonacci_heap {
 		/* members */
 			public:
 				// constructors
-					fibonacci_heap() : n(0), min(nullptr) {
-						int a = -1;
-						push(0, &a);
-						extract_min();
-
-					}
+					fibonacci_heap() : n(0), min(nullptr) {}
 					fibonacci_heap(const fibonacci_heap& other) : n(other.n), min(other.min) {}
-					fibonacci_heap(fibonacci_heap&& other) noexcept : n(other.n), min(other.min) { delete_Nodes(other.min); }
+					fibonacci_heap(fibonacci_heap&& other) noexcept : n(other.n), min(other.min) { delete_nodes(other.min); }
 				// destructor
 					~fibonacci_heap() noexcept { delete_nodes(min); }
 				// operators
@@ -89,7 +85,7 @@ namespace fibonacci_heap {
 					size_t size() const noexcept { return n; }
 				// accessors
 					c_node* topNode() const { return minimum(); }
-					T top() const { return static_cast<T>(*reinterpret_cast<T*>(&minimum()->key)); }
+					T top() { return to_T(&(minimum()->key)); }
 					[[time_complexity::Θ(1)]] c_node* minimum() const { return min; }
 					c_node* extract_min() {
 						c_node* z = min;
@@ -209,21 +205,19 @@ namespace fibonacci_heap {
 						++x->degree;
 						y->mark = false;
 					}
-					c_node* push(const T& k, void* pl = nullptr) {
-						return insert(create_c_node_on_heap(reinterpret_cast<void*>(static_cast<T*>(const_cast<T*>(&k))), pl));
-					}
-					c_node* push(T&& k, void* pl = nullptr) { return insert(new c_node{ reinterpret_cast<void*>(static_cast<T*>(&k)), pl }); }
+					c_node* push(const T& k, void* pl = nullptr) { return insert(create_c_node_on_heap(to_void_p(k), pl)); }
+					c_node* push(T&& k, void* pl = nullptr) { return insert(create_c_node_on_heap(to_void_p(k), pl)); }
 					[[using time_complexity:Θ(1), amortized]] void decrease_key(c_node* x, T k) {
 						try {
-							if(static_cast<T>(*reinterpret_cast<T*>(&x->key)) < k)
+							if(to_T(&x->key) < k)
 								throw std::out_of_range("new key is greater than current key");
 						}
 						catch(std::out_of_range& e) {
 							e.what();
 							return;
 						}
-						x->key = reinterpret_cast<void*>(static_cast<T*>(&k));
-						if(c_node* y = x->p; y != nullptr && static_cast<T>(*reinterpret_cast<T*>(&x->key)) < static_cast<T>(*reinterpret_cast<T*>(&y->key))) {
+						x->key = to_void_p(k);
+						if(c_node* y = x->p; y != nullptr && to_T(&x->key) < to_T(&y->key)) {
 							cut(x, y);
 							cascading_cut(y);
 						}
@@ -306,6 +300,9 @@ namespace fibonacci_heap {
 						}
 					}
 				}
+				void* to_void_p(const T& value) { return reinterpret_cast<void*>(static_cast<T*>(const_cast<T*>(&value))); }
+				void* to_void_p(T& value) { return reinterpret_cast<void*>(static_cast<T*>(&value)); }
+				T to_T(void* value) { return static_cast<T>(*reinterpret_cast<T*>(value)); }
 	};
 }
 

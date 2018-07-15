@@ -65,7 +65,7 @@ void fill_queues(fibonacci_heap::fibonacci_queue::fibonacci_queue<int>& fh, prio
 bool match_queues(fibonacci_heap::fibonacci_queue::fibonacci_queue<int>& fh, priority_queue<int, vector<int>, lowerI>& pqueue) { // greater<int> ?
 	while(!pqueue.empty()) {
 		int i1 = pqueue.top(), i2 = fh.top();
-		//cerr << "i1: " << i1 << " -- i2: " << i2 << endl;
+		// cerr << "i1: " << i1 << " -- i2: " << i2 << endl;
 		assert(i1 == i2);
 		pqueue.pop();
 		fh.pop();
@@ -79,15 +79,15 @@ int main(int argc, char *argv[]) {
 	unsigned int n = 10;
 	std::priority_queue<int, vector<int>, lowerI> pqueue;
 
-	//srand(time(0));
+	// srand(time(0));
 
 	fill_heaps(fh, pqueue, n);
 	assert(match_heaps(fh, pqueue));
 
 	fill_heaps(fh, pqueue, n);
-	//cerr << "top pqueue: " << pqueue.top() << " -- top fh: " << fh.top() << endl;
+	// cerr << "top pqueue: " << pqueue.top() << " -- top fh: " << fh.top() << endl;
 	int r = pqueue.top()-1;
-	//cerr << "old val: " << pqueue.top() << " -- new val: " << r << endl;
+	// cerr << "old val: " << pqueue.top() << " -- new val: " << r << endl;
 	pqueue.pop();
 	pqueue.push(r);
 	make_heap(const_cast<int*>(&pqueue.top()), const_cast<int*>(&pqueue.top()) + pqueue.size(), lowerI());
