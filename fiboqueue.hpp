@@ -78,7 +78,7 @@ namespace fibonacci_heap::fibonacci_queue {
 						if(mit != range.second)
 							fstore.erase(mit);
 						else
-							std::cerr << "[Error]: key " << x->key << " cannot be found in FiboQueue fast store" << std::endl;
+							std::cerr << "[Error]: key " << fibonacci_heap<T>::to_T(&x->key) << " cannot be found in FiboQueue fast store" << std::endl;
 						delete x;
 					}
 					c_node* push(const T& k, void* pl = nullptr) {

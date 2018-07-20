@@ -85,7 +85,10 @@ namespace fibonacci_heap {
 					size_t size() const noexcept { return n; }
 				// accessors
 					c_node* topNode() const { return minimum(); }
-					T top() { return to_T(&(minimum()->key)); }
+					T top() {
+						//std::cout << "top " << to_T(minimum()->key) << std::endl;
+						return to_T(minimum()->key);
+					}
 					[[time_complexity::Θ(1)]] c_node* minimum() const { return min; }
 					c_node* extract_min() {
 						c_node* z = min;
@@ -139,10 +142,11 @@ namespace fibonacci_heap {
 							x->left = min->left;
 							min->left = x;
 							x->right = min;
-							if(x->key < min->key)
+							if(to_T(&x->key) < to_T(&min->key))
 								min = x;
 						}
 						++n;
+						std::cout << "insert " << top() << std::endl;
 						return x;
 					}
 					[[time_complexity::Θ(1)]] static fibonacci_heap* union_fibheap(fibonacci_heap* H1, fibonacci_heap* H2) {
@@ -154,7 +158,7 @@ namespace fibonacci_heap {
 							H->min->right = H2->min;
 							H2->min->left = H->min;
 						}
-						if(H1->min == nullptr || (H2->min != nullptr && H2->min->key < H1->min->key))
+						if(H1->min == nullptr || (H2->min != nullptr && to_T(H2->min->key) < to_T(H1->min->key)))
 							H->min = H2->min;
 						H->n = H1->n + H2->n;
 						return H;
@@ -221,7 +225,7 @@ namespace fibonacci_heap {
 							cut(x, y);
 							cascading_cut(y);
 						}
-						if(x->key < min->key)
+						if(to_T(&x->key) < to_T(&min->key))
 							min = x;
 					}
 			protected:
@@ -275,7 +279,7 @@ namespace fibonacci_heap {
 						auto d = x->degree;
 						while(A.at(d) != nullptr) {
 							y = A.at(d);
-							if(y->key < x->key)
+							if(to_T(y->key) < to_T(x->key))
 								std::swap(x, y);
 							fib_heap_link(y, x);
 							A.at(d) = nullptr;
@@ -294,7 +298,7 @@ namespace fibonacci_heap {
 								element->left = min->left;
 								min->left = element;
 								element->right = min;
-								if(element->key < min->key)
+								if(to_T(element->key) < to_T(min->key))
 									min = element;
 							}
 						}
