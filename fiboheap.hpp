@@ -100,8 +100,8 @@ namespace fibonacci_heap {
 
 								for_each(childList.begin(), childList.end(),
 									[](auto& element) {
-									element = element->right;
-								}
+										element = element->right;
+									}
 								);
 
 								for(auto i = 0; i < z->degree; ++i) {

@@ -40,19 +40,19 @@ namespace fibonacci_heap::fibonacci_queue {
 			public:
 				// constructors
 					fibonacci_queue() {}
-					fibonacci_queue(const fibonacci_queue& other) : n(other.n), fstore(other.fstore), min(other.min) {}
-					fibonacci_queue(fibonacci_queue&& other) noexcept : n(other.n), fstore(other.fstore), min(other.min) { delete_nodes(other.min); }
+					fibonacci_queue(const fibonacci_queue& other) : fibonacci_heap<T>::n(other.n), fstore(other.fstore), fibonacci_heap<T>::min(other.min) {}
+					fibonacci_queue(fibonacci_queue&& other) noexcept : fibonacci_heap<T>::n(other.n), fstore(other.fstore), fibonacci_heap<T>::min(other.min) { delete_nodes(other.min); }
 				// destructor
 					~fibonacci_queue() noexcept {}
 				// operators
 					fibonacci_queue& operator=(const fibonacci_queue& other) {
-						n = other.n;
-						min = other.min;
+						fibonacci_heap<T>::n = other.n;
+						fibonacci_heap<T>::min = other.min;
 						fstore = other.fstore;
 					}
 					fibonacci_queue& operator=(fibonacci_queue&& other) noexcept {
-						n = other.n;
-						min = other.min;
+						fibonacci_heap<T>::n = other.n;
+						fibonacci_heap<T>::min = other.min;
 						fstore = other.fstore;
 						delete_nodes(other.min);
 					}
