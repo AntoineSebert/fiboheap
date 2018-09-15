@@ -25,6 +25,7 @@
 using namespace std;
 
 void fill_heaps(fibonacci_heap::fibonacci_heap<int>& fh, priority_queue<int, vector<int>, greater<int>>& pqueue, const unsigned int& n) {
+	cout << "fill heaps begin" << endl;
 	for(unsigned int i = 0; i < n; ++i) {
 		auto r = rand();
 		fh.push(r);
@@ -33,18 +34,21 @@ void fill_heaps(fibonacci_heap::fibonacci_heap<int>& fh, priority_queue<int, vec
 	}
 	assert(fh.size() == n);
 	assert(pqueue.size() == n);
-	cout << "fill_heaps " << fh.top() << endl;
+	fh.top();
+	cout << "fill heaps end" << endl;
 }
 
 bool match_heaps(fibonacci_heap::fibonacci_heap<int>& fh, priority_queue<int, vector<int>, greater<int>>& pqueue) {
+	cout << "match heaps begin" << endl;
 	while(!pqueue.empty()) {
-		int i1 = pqueue.top(), i2 = fh.top();
+		auto i1 = pqueue.top(), i2 = fh.top();
 		cerr << "i1: " << i1 << " -- i2: " << i2 << endl;
-		//assert(i1 == i2);
+		assert(i1 == i2);
 		pqueue.pop();
 		fh.pop();
 	}
 	assert(fh.empty());
+	cout << "match heaps end" << endl;
 	return true;
 }
 
@@ -59,10 +63,10 @@ void fill_queues(fibonacci_heap::fibonacci_queue::fibonacci_queue<int>& fh, prio
 	assert(pqueue.size() == n);
 }
 
-bool match_queues(fibonacci_heap::fibonacci_queue::fibonacci_queue<int>& fh, priority_queue<int, vector<int>, greater<int>>& pqueue) { // greater<int> ?
+bool match_queues(fibonacci_heap::fibonacci_queue::fibonacci_queue<int>& fh, priority_queue<int, vector<int>, greater<int>>& pqueue) {
 	while(!pqueue.empty()) {
 		int i1 = pqueue.top(), i2 = fh.top();
-		// cerr << "i1: " << i1 << " -- i2: " << i2 << endl;
+		cerr << "i1: " << i1 << " -- i2: " << i2 << endl;
 		assert(i1 == i2);
 		pqueue.pop();
 		fh.pop();
@@ -71,7 +75,7 @@ bool match_queues(fibonacci_heap::fibonacci_queue::fibonacci_queue<int>& fh, pri
 	return true;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
 	fibonacci_heap::fibonacci_heap<int> fh;
 	unsigned int n = 10;
 	priority_queue<int, vector<int>, greater<int>> pqueue;
@@ -79,11 +83,12 @@ int main(int argc, char *argv[]) {
 	// srand(time(0));
 
 	fill_heaps(fh, pqueue, n);
+	fh.top();
 	assert(match_heaps(fh, pqueue));
 
 	fill_heaps(fh, pqueue, n);
 	// cerr << "top pqueue: " << pqueue.top() << " -- top fh: " << fh.top() << endl;
-	int r = pqueue.top()-1;
+	int r = pqueue.top() - 1;
 	// cerr << "old val: " << pqueue.top() << " -- new val: " << r << endl;
 	pqueue.pop();
 	pqueue.push(r);

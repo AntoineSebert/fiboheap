@@ -17,7 +17,7 @@
  */
 
 /*
- * @note sizeof(Node) = 136, sizeof(c_node) = 64
+ * @note sizeof(Node) = 136, sizeof(c_node) = 56
  */
 
 #ifndef FIBOHEAP_HPP
@@ -34,23 +34,20 @@
 namespace fibonacci_heap {
 	extern "C" {
 		typedef struct c_node {
+			// The order of the attributes matter, changing it may result in a larger memory consumption. See "memory alignment in C".
 			void* key = nullptr, *payload = nullptr;
-			bool mark = false;
 			c_node* p = nullptr, *left = nullptr, *right = nullptr, *child = nullptr;
 			int degree = -1;
+			bool mark = false;
 		} c_node;
 		c_node* create_c_node_on_heap(void* _key, void* _payload) {
 			// création de l'élément
-			c_node b;
+			c_node* node = (c_node*)malloc(sizeof(c_node));
 			// initialisation des membres
-			b.key = _key;
-			b.payload = _payload;
-			// allocation mémoire sur la heap
-			c_node* c_node_p = (c_node*)malloc(sizeof(c_node));
-			// copie des données
-			memcpy(c_node_p, &b, sizeof *c_node_p);
-			// 
-			return c_node_p;
+			node->key = _key;
+			node->payload = _payload;
+
+			return node;
 		}
 	}
 }
@@ -65,7 +62,7 @@ namespace fibonacci_heap {
 		/* members */
 			public:
 				// constructors
-					fibonacci_heap() : n(0), min(nullptr) {}
+					fibonacci_heap() : n(0), min(nullptr) { }
 					fibonacci_heap(const fibonacci_heap& other) : n(other.n), min(other.min) {}
 					fibonacci_heap(fibonacci_heap&& other) noexcept : n(other.n), min(other.min) { delete_nodes(other.min); }
 				// destructor
@@ -86,7 +83,7 @@ namespace fibonacci_heap {
 				// accessors
 					c_node* topNode() const { return minimum(); }
 					T top() {
-						//std::cout << "top " << to_T(minimum()->key) << std::endl;
+						std::cout << "\ttop " << to_T(minimum()->key) << " address " << &minimum()->key << std::endl;
 						return to_T(minimum()->key);
 					}
 					[[time_complexity::Θ(1)]] c_node* minimum() const { return min; }
@@ -132,6 +129,7 @@ namespace fibonacci_heap {
 							delete x;
 					}
 					[[time_complexity::Θ(1)]] c_node* insert(c_node* x) {
+						std::cout << "\tinsert key " << to_T(x->key) << std::endl;
 						x->degree = 0;
 						x->child = x->p = nullptr;
 						x->mark = false;
@@ -146,7 +144,6 @@ namespace fibonacci_heap {
 								min = x;
 						}
 						++n;
-						std::cout << "insert " << top() << std::endl;
 						return x;
 					}
 					[[time_complexity::Θ(1)]] static fibonacci_heap* union_fibheap(fibonacci_heap* H1, fibonacci_heap* H2) {
@@ -233,9 +230,10 @@ namespace fibonacci_heap {
 					if(!x)
 						return;
 					c_node* cur = x;
+					std::cout << "deleting " << &x << std::endl;
 					while(true) {
 						// cerr << "cur: " << cur << endl << "x: " << x << endl;
-						if(cur->left && cur->left != x) {
+						if(cur->left != nullptr && cur->left != x) {
 							// cerr << "\tcur left: " << cur->left << endl;
 							c_node* tmp = cur;
 							cur = cur->left;
@@ -304,9 +302,9 @@ namespace fibonacci_heap {
 						}
 					}
 				}
-				void* to_void_p(const T& value) { return reinterpret_cast<void*>(static_cast<T*>(const_cast<T*>(&value))); }
-				void* to_void_p(T& value) { return reinterpret_cast<void*>(static_cast<T*>(&value)); }
-				T to_T(void* value) { return static_cast<T>(*reinterpret_cast<T*>(value)); }
+				void* to_void_p(const T& value) const { return static_cast<void*>(static_cast<T*>(const_cast<T*>(&value))); }
+				void* to_void_p(T& value) const { return static_cast<void*>(static_cast<T*>(&value)); }
+				T to_T(void* value) const { return static_cast<T>(*static_cast<T*>(value)); }
 	};
 }
 
